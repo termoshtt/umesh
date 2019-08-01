@@ -1,3 +1,4 @@
+use petgraph::graph::{node_index, Graph};
 use std::cmp::{Ord, Ordering};
 
 type VertexIndex = isize;
@@ -99,7 +100,7 @@ impl Permutations {
         Vertex::new(&orbit)
     }
 
-    fn to_graph(&self) -> (Vec<Vertex>, Vec<Edge>) {
+    fn to_graph(&self) -> Graph<usize, usize> {
         let n = self.len();
 
         // Gather vertices
@@ -116,7 +117,15 @@ impl Permutations {
                 es[t].end = i as isize;
             }
         }
-        (vs, es)
+
+        let mut g = Graph::new();
+        for i in 0..vs.len() {
+            g.add_node(i);
+        }
+        for (i, e) in es.iter().enumerate() {
+            g.add_edge(node_index(e.start as usize), node_index(e.end as usize), i);
+        }
+        g
     }
 }
 
@@ -139,9 +148,8 @@ mod tests {
     fn permutations() {
         let p = Permutations::new(&[2, 7, 4, 1, 6, 3, 0, 5]);
         dbg!(&p);
-        let (v, e) = p.to_graph();
-        dbg!(&v);
-        dbg!(&e);
+        let g = p.to_graph();
+        dbg!(g);
         panic!()
     }
 }
