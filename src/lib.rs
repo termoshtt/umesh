@@ -1,5 +1,6 @@
 use std::cmp::{Ord, Ordering};
 
+type VertexIndex = isize;
 type EdgeIndex = usize;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq, Eq)]
@@ -44,6 +45,28 @@ impl Vertex {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+struct Edge {
+    /// -1 if not set
+    start: VertexIndex,
+    /// -1 if not set
+    end: VertexIndex,
+}
+
+impl Edge {
+    fn new() -> Self {
+        Edge { start: -1, end: -1 }
+    }
+}
+
+fn twin(index: usize) -> usize {
+    if index % 2 == 0 {
+        index + 1
+    } else {
+        index - 1
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Permutations {
     next: Vec<EdgeIndex>,
@@ -66,12 +89,8 @@ impl Permutations {
         let mut orbit = vec![init];
         let mut current = init;
         loop {
-            let twin = if current % 2 == 0 {
-                current + 1
-            } else {
-                current - 1
-            };
-            current = self.next[twin];
+            let t = twin(current);
+            current = self.next[t];
             if current == init {
                 break;
             }
@@ -80,12 +99,24 @@ impl Permutations {
         Vertex::new(&orbit)
     }
 
-    fn vertices(&self) -> Vec<Vertex> {
+    fn to_graph(&self) -> (Vec<Vertex>, Vec<Edge>) {
         let n = self.len();
+
+        // Gather vertices
         let mut vs: Vec<_> = (0..n).map(|init| self.next_twin_orbit(init)).collect();
         vs.sort_unstable();
         vs.dedup();
-        vs
+
+        // Regenerate edges
+        let mut es = vec![Edge::new(); n];
+        for (i, v) in vs.iter().enumerate() {
+            for &id in &v.edges {
+                es[id].start = i as isize;
+                let t = twin(id);
+                es[t].end = i as isize;
+            }
+        }
+        (vs, es)
     }
 }
 
@@ -108,8 +139,9 @@ mod tests {
     fn permutations() {
         let p = Permutations::new(&[2, 7, 4, 1, 6, 3, 0, 5]);
         dbg!(&p);
-        let v = p.vertices();
+        let (v, e) = p.to_graph();
         dbg!(&v);
+        dbg!(&e);
         panic!()
     }
 }
