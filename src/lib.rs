@@ -69,12 +69,12 @@ fn twin(index: usize) -> usize {
 }
 
 #[derive(Debug, Clone)]
-struct Permutations {
+pub struct Permutations {
     next: Vec<EdgeIndex>,
 }
 
 impl Permutations {
-    fn new(next: &[EdgeIndex]) -> Self {
+    pub fn new(next: &[EdgeIndex]) -> Self {
         assert_eq!(next.len() % 2, 0);
         // TODO Can we check the permutation is even easily?
         Permutations {
@@ -82,7 +82,7 @@ impl Permutations {
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.next.len()
     }
 
@@ -100,7 +100,7 @@ impl Permutations {
         Vertex::new(&orbit)
     }
 
-    fn to_graph(&self) -> Graph<usize, usize> {
+    pub fn to_graph(&self) -> Graph<usize, usize> {
         let n = self.len();
 
         // Gather vertices
