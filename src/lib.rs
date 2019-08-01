@@ -47,15 +47,15 @@ impl Vertex {
 #[derive(Debug, Clone)]
 struct Permutations {
     next: Vec<EdgeIndex>,
-    twin: Vec<EdgeIndex>,
 }
 
 impl Permutations {
-    fn new(next: Vec<EdgeIndex>, twin: Vec<EdgeIndex>) -> Self {
+    fn new(next: &[EdgeIndex]) -> Self {
         assert_eq!(next.len() % 2, 0);
-        assert_eq!(twin.len() % 2, 0);
-        assert_eq!(next.len(), twin.len());
-        Permutations { next, twin }
+        // TODO Can we check the permutation is even easily?
+        Permutations {
+            next: next.to_vec(),
+        }
     }
 
     fn len(&self) -> usize {
@@ -66,7 +66,12 @@ impl Permutations {
         let mut orbit = vec![init];
         let mut current = init;
         loop {
-            current = self.next[self.twin[current]];
+            let twin = if current % 2 == 0 {
+                current + 1
+            } else {
+                current - 1
+            };
+            current = self.next[twin];
             if current == init {
                 break;
             }
@@ -101,7 +106,7 @@ mod tests {
 
     #[test]
     fn permutations() {
-        let p = Permutations::new(vec![2, 7, 4, 1, 6, 3, 0, 5], vec![1, 0, 3, 2, 5, 4, 7, 6]);
+        let p = Permutations::new(&[2, 7, 4, 1, 6, 3, 0, 5]);
         dbg!(&p);
         let v = p.vertices();
         dbg!(&v);
