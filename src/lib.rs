@@ -143,13 +143,4 @@ mod tests {
             }
         );
     }
-
-    #[test]
-    fn permutations() {
-        let p = Permutations::new(&[2, 7, 4, 1, 6, 3, 0, 5]);
-        dbg!(&p);
-        let g = p.to_graph();
-        dbg!(g);
-        panic!()
-    }
 }
