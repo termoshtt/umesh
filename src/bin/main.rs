@@ -1,6 +1,6 @@
 use petgraph::dot::Dot;
 use std::env;
-use umesh::Permutations;
+use umesh::permutation::Permutations;
 
 fn main() {
     let pm: Vec<usize> = env::args()
