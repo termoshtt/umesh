@@ -7,11 +7,11 @@ based on [Keenan Crane][DDG].
 
 */
 
-/// Sorted indices (equal to CRS format in sparce matrices)
+/// Sorted indices (equal to CRS format in sparce matrices without elements)
 #[derive(Debug, Clone)]
 pub struct ConnectionMatrix {
-    fr_indices: Vec<usize>,
-    to_indices: Vec<usize>,
+    fr: Vec<usize>,
+    to: Vec<usize>,
 }
 
 impl ConnectionMatrix {
@@ -38,16 +38,24 @@ impl ConnectionMatrix {
     /// ------
     /// - unsafe if the input indices are not sorted
     pub unsafe fn from_sorted_vec(indices: Vec<(usize, usize)>) -> Self {
-        let mut fr_indices = Vec::with_capacity(indices.len());
-        let mut to_indices = Vec::with_capacity(indices.len());
-        for &(fr, to) in &indices {
-            fr_indices.push(fr);
-            to_indices.push(to);
+        let mut to = Vec::with_capacity(indices.len());
+        let mut fr = vec![0];
+        let mut current_fr = 0;
+        for (n, (f, t)) in indices.into_iter().enumerate() {
+            while f != current_fr {
+                fr.push(n);
+                current_fr += 1;
+            }
+            to.push(t);
         }
-        ConnectionMatrix {
-            fr_indices,
-            to_indices,
-        }
+        fr.push(to.len());
+        ConnectionMatrix { fr, to }
+    }
+
+    pub fn get_connected(&self, from_index: usize) -> &[usize] {
+        let first = self.fr[from_index];
+        let last = self.fr[from_index + 1];
+        &self.to[first..last]
     }
 }
 
@@ -60,4 +68,52 @@ pub struct Mesh<Vertex, Edge, Face> {
     vertex_edge: ConnectionMatrix,
     /// A1 matrix in DDG
     edge_face: ConnectionMatrix,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn connnection_matrix_square() {
+        // 1 0 1 0
+        // 1 1 0 0
+        // 0 1 0 1
+        // 1 0 0 1
+        let mat = ConnectionMatrix::from_vec(vec![
+            (0, 0),
+            (0, 2),
+            (1, 0),
+            (1, 1),
+            (2, 1),
+            (2, 3),
+            (3, 0),
+            (3, 3),
+        ]);
+        dbg!(&mat);
+        assert_eq!(mat.fr, vec![0, 2, 4, 6, 8]);
+        assert_eq!(mat.to, vec![0, 2, 0, 1, 1, 3, 0, 3]);
+    }
+
+    #[test]
+    fn connnection_matrix_nonsquare() {
+        // 1 0 1 0
+        // 0 1 0 1
+        // 1 0 0 1
+        let mat = ConnectionMatrix::from_vec(vec![(0, 0), (0, 2), (1, 1), (1, 3), (2, 0), (2, 3)]);
+        dbg!(&mat);
+        assert_eq!(mat.fr, vec![0, 2, 4, 6]);
+        assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
+    }
+
+    #[test]
+    fn connnection_matrix_empty_row() {
+        // 1 0 1 0
+        // 0 0 0 0
+        // 0 1 0 1
+        // 1 0 0 1
+        let mat = ConnectionMatrix::from_vec(vec![(0, 0), (0, 2), (2, 1), (2, 3), (3, 0), (3, 3)]);
+        dbg!(&mat);
+        assert_eq!(mat.fr, vec![0, 2, 2, 4, 6]);
+        assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
+    }
 }
