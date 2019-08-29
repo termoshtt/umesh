@@ -61,4 +61,40 @@ impl Mesh {
         );
         Self::from_connections(vertex_edge, edge_face)
     }
+
+    /// Get simplicies
+    pub fn simplicies(
+        &self,
+        vertices: Vec<usize>,
+        edges: Vec<usize>,
+        faces: Vec<usize>,
+    ) -> Simplices {
+        Simplices {
+            mesh: self,
+            vertices,
+            edges,
+            faces,
+        }
+    }
+}
+
+/// Simplices in the mesh
+///
+/// - Simplex on the half-edge mesh must be one of vertex, edge, and face.
+#[derive(Debug, Clone)]
+pub struct Simplices<'mesh> {
+    mesh: &'mesh Mesh,
+    vertices: Vec<usize>,
+    edges: Vec<usize>,
+    faces: Vec<usize>,
+}
+
+impl<'mesh> Simplices<'mesh> {
+    pub fn is_complex(&self) -> bool {
+        unimplemented!()
+    }
+
+    pub fn is_pure_complex(&self) -> bool {
+        unimplemented!()
+    }
 }
