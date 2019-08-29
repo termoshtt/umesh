@@ -65,6 +65,26 @@ impl Mesh {
     /// Get simplicies
     pub fn simplicies(
         &self,
+        mut vertices: Vec<usize>,
+        mut edges: Vec<usize>,
+        mut faces: Vec<usize>,
+    ) -> Simplices {
+        vertices.sort_unstable();
+        vertices.dedup();
+        edges.sort_unstable();
+        edges.dedup();
+        faces.sort_unstable();
+        faces.dedup();
+        unsafe { self.simplicies_sorted(vertices, edges, faces) }
+    }
+
+    /// Get simplicies with sorted unique indices
+    ///
+    /// Safety
+    /// -------
+    /// - Input vectors must be sorted and uniqued
+    pub unsafe fn simplicies_sorted(
+        &self,
         vertices: Vec<usize>,
         edges: Vec<usize>,
         faces: Vec<usize>,
