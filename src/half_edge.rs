@@ -7,6 +7,8 @@ based on [Keenan Crane][DDG].
 
 */
 
+use crate::permutation::*;
+
 /// Sorted indices (equal to CRS format in sparce matrices without elements)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectionMatrix {
@@ -199,5 +201,32 @@ impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
             vertex_edge,
             edge_face,
         }
+    }
+
+    /// Create from permutation (see DDG §2.5 for detail)
+    ///
+    /// Vertices, edges, and faces are initialized by `Default` trait.
+    pub fn from_permutation(permutation: &[usize]) -> Self
+    where
+        Vertex: Default + Clone,
+        Edge: Default + Clone,
+        Face: Default + Clone,
+    {
+        let vertex_edge = ConnectionMatrix::from_iter(
+            gather_vertices(permutation)
+                .iter()
+                .enumerate()
+                .map(move |(v, orbit)| orbit.indices().iter().map(move |&e| (v, e)))
+                .flatten(),
+        );
+
+        let edge_face = ConnectionMatrix::from_iter(
+            gather_faces(permutation)
+                .iter()
+                .enumerate()
+                .map(move |(f, orbit)| orbit.indices().iter().map(move |&e| (e, f)))
+                .flatten(),
+        );
+        Self::from_connections(vertex_edge, edge_face)
     }
 }
