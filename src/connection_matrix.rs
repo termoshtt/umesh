@@ -65,6 +65,10 @@ impl ConnectionMatrix {
             to: &self.to,
         }
     }
+
+    pub fn transpose(&self) -> Self {
+        Self::from_iter(self.indices().map(|(f, t)| (t, f)))
+    }
 }
 
 pub struct IndexIter<'mat> {

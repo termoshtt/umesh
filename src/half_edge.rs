@@ -16,8 +16,12 @@ pub struct Mesh<Vertex, Edge, Face> {
     faces: Vec<Face>,
     /// A0 matrix in DDG
     vertex_edge: ConnectionMatrix,
+    /// Transpose of A0
+    edge_vertex: ConnectionMatrix,
     /// A1 matrix in DDG
     edge_face: ConnectionMatrix,
+    /// Transpose of A1
+    face_edge: ConnectionMatrix,
 }
 
 impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
@@ -36,12 +40,17 @@ impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
         let vertices = vec![Default::default(); v];
         let edges = vec![Default::default(); e1];
         let faces = vec![Default::default(); f];
+
+        let edge_vertex = vertex_edge.transpose();
+        let face_edge = edge_face.transpose();
         Mesh {
             vertices,
             edges,
             faces,
             vertex_edge,
+            edge_vertex,
             edge_face,
+            face_edge,
         }
     }
 
