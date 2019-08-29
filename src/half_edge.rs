@@ -177,6 +177,9 @@ pub struct Mesh<Vertex, Edge, Face> {
 }
 
 impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
+    /// Create mesh from two connection matrices `A0` and `A1` in DDG
+    ///
+    /// Vertices, edges, and faces are initialized by `Default` trait.
     pub fn from_connections(vertex_edge: ConnectionMatrix, edge_face: ConnectionMatrix) -> Self
     where
         Vertex: Default + Clone,
