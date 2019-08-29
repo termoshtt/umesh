@@ -69,6 +69,18 @@ impl ConnectionMatrix {
     pub fn transpose(&self) -> Self {
         Self::from_iter(self.indices().map(|(f, t)| (t, f)))
     }
+
+    pub fn map(&self, from_indices: &[usize]) -> Vec<usize> {
+        let mut mapped: Vec<usize> = from_indices
+            .iter()
+            .map(|&from_index| self.get_connected(from_index).iter())
+            .flatten()
+            .cloned()
+            .collect();
+        mapped.sort_unstable();
+        mapped.dedup();
+        mapped
+    }
 }
 
 pub struct IndexIter<'mat> {
