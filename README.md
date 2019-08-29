@@ -1,7 +1,7 @@
 umesh: mincro mesher
 ====================
 
-** CAUTION: This software is in pre-alpha stage. Do not use!! **
+**CAUTION: This software is in pre-alpha stage. Do not use!!**
 
 This crate implements discrite differential geometrical algorithms based on the textbook,
 [Keenan Crane "DISCRETE DIFFERENTIAL GEOMETRY: AN APPLIED INTRODUCTION"][DDG].
