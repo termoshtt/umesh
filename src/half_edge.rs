@@ -12,20 +12,20 @@ use crate::{connection_matrix::*, permutation::*};
 #[derive(Debug, Clone)]
 pub struct Mesh {
     /// A0 matrix in DDG
-    vertex_edge: ConnectionMatrix,
+    vertex_edge: Connection,
     /// Transpose of A0
-    edge_vertex: ConnectionMatrix,
+    edge_vertex: Connection,
     /// A1 matrix in DDG
-    edge_face: ConnectionMatrix,
+    edge_face: Connection,
     /// Transpose of A1
-    face_edge: ConnectionMatrix,
+    face_edge: Connection,
 }
 
 impl Mesh {
     /// Create mesh from two connection matrices `A0` and `A1` in DDG
     ///
     /// Vertices, edges, and faces are initialized by `Default` trait.
-    pub fn from_connections(vertex_edge: ConnectionMatrix, edge_face: ConnectionMatrix) -> Self {
+    pub fn from_connections(vertex_edge: Connection, edge_face: Connection) -> Self {
         let (_, e1) = vertex_edge.shape();
         let (e2, _) = edge_face.shape();
         assert_eq!(e1, e2); // Vertex-Edge matrix and Edge-Face matrix are compatible
@@ -44,7 +44,7 @@ impl Mesh {
     ///
     /// Vertices, edges, and faces are initialized by `Default` trait.
     pub fn from_permutation(permutation: &[usize]) -> Self {
-        let vertex_edge = ConnectionMatrix::from_iter(
+        let vertex_edge = Connection::from_iter(
             gather_vertices(permutation)
                 .iter()
                 .enumerate()
@@ -52,7 +52,7 @@ impl Mesh {
                 .flatten(),
         );
 
-        let edge_face = ConnectionMatrix::from_iter(
+        let edge_face = Connection::from_iter(
             gather_faces(permutation)
                 .iter()
                 .enumerate()

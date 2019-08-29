@@ -1,12 +1,12 @@
-/// Sorted indices (equal to CRS format in sparce matrices without elements)
+/// Sorted indices of a connection (equal to CRS format in sparce matrices without elements)
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConnectionMatrix {
+pub struct Connection {
     fr: Vec<usize>,
     to: Vec<usize>,
     to_max: usize,
 }
 
-impl ConnectionMatrix {
+impl Connection {
     /// Create connection matrix from a series of pair of indices.
     /// The indices will be sorted.
     pub fn from_iter<Iter>(iter: Iter) -> Self
@@ -43,13 +43,27 @@ impl ConnectionMatrix {
             to.push(t);
         }
         fr.push(to.len());
-        ConnectionMatrix { fr, to, to_max }
+        Connection { fr, to, to_max }
     }
 
+    /// Get connected indices
     pub fn get_connected(&self, from_index: usize) -> &[usize] {
         let first = self.fr[from_index];
         let last = self.fr[from_index + 1];
         &self.to[first..last]
+    }
+
+    /// Get connected indices of input indices
+    pub fn gather_connected(&self, from_indices: &[usize]) -> Vec<usize> {
+        let mut mapped: Vec<usize> = from_indices
+            .iter()
+            .map(|&from_index| self.get_connected(from_index).iter())
+            .flatten()
+            .cloned()
+            .collect();
+        mapped.sort_unstable();
+        mapped.dedup();
+        mapped
     }
 
     pub fn shape(&self) -> (usize, usize) {
@@ -68,18 +82,6 @@ impl ConnectionMatrix {
 
     pub fn transpose(&self) -> Self {
         Self::from_iter(self.indices().map(|(f, t)| (t, f)))
-    }
-
-    pub fn map(&self, from_indices: &[usize]) -> Vec<usize> {
-        let mut mapped: Vec<usize> = from_indices
-            .iter()
-            .map(|&from_index| self.get_connected(from_index).iter())
-            .flatten()
-            .cloned()
-            .collect();
-        mapped.sort_unstable();
-        mapped.dedup();
-        mapped
     }
 }
 
@@ -114,12 +116,12 @@ impl<'mat> Iterator for IndexIter<'mat> {
 mod tests {
     use super::*;
     #[test]
-    fn connnection_matrix_square() {
+    fn square() {
         // 1 0 1 0
         // 1 1 0 0
         // 0 1 0 1
         // 1 0 0 1
-        let mat = ConnectionMatrix::from_vec(vec![
+        let mat = Connection::from_vec(vec![
             (0, 0),
             (0, 2),
             (1, 0),
@@ -136,11 +138,11 @@ mod tests {
     }
 
     #[test]
-    fn connnection_matrix_nonsquare() {
+    fn nonsquare() {
         // 1 0 1 0
         // 0 1 0 1
         // 1 0 0 1
-        let mat = ConnectionMatrix::from_vec(vec![(0, 0), (0, 2), (1, 1), (1, 3), (2, 0), (2, 3)]);
+        let mat = Connection::from_vec(vec![(0, 0), (0, 2), (1, 1), (1, 3), (2, 0), (2, 3)]);
         dbg!(&mat);
         assert_eq!(mat.fr, vec![0, 2, 4, 6]);
         assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
@@ -148,12 +150,12 @@ mod tests {
     }
 
     #[test]
-    fn connnection_matrix_empty_row() {
+    fn empty_row() {
         // 1 0 1 0
         // 0 0 0 0
         // 0 1 0 1
         // 1 0 0 1
-        let mat = ConnectionMatrix::from_vec(vec![(0, 0), (0, 2), (2, 1), (2, 3), (3, 0), (3, 3)]);
+        let mat = Connection::from_vec(vec![(0, 0), (0, 2), (2, 1), (2, 3), (3, 0), (3, 3)]);
         dbg!(&mat);
         assert_eq!(mat.fr, vec![0, 2, 2, 4, 6]);
         assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
@@ -166,8 +168,8 @@ mod tests {
         // 0 1 0 0
         // 0 1 0 1
         // 1 0 0 1
-        let mat = ConnectionMatrix::from_vec(vec![(0, 0), (1, 1), (2, 1), (2, 3), (3, 0), (3, 3)]);
-        let mat2 = ConnectionMatrix::from_iter(mat.indices());
+        let mat = Connection::from_vec(vec![(0, 0), (1, 1), (2, 1), (2, 3), (3, 0), (3, 3)]);
+        let mat2 = Connection::from_iter(mat.indices());
         assert_eq!(mat, mat2);
     }
 }
