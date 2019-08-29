@@ -97,4 +97,24 @@ impl<'mesh> Simplices<'mesh> {
     pub fn is_pure_complex(&self) -> bool {
         unimplemented!()
     }
+
+    /// Star operation `St(S)` (not Hodge star)
+    pub fn star(&self) -> Self {
+        unimplemented!()
+    }
+
+    /// Closure operation `Cl(S)`
+    pub fn closure(&self) -> Self {
+        unimplemented!()
+    }
+
+    /// Link operation `Lk(S)`
+    pub fn link(&self) -> Self {
+        unimplemented!()
+    }
+
+    /// Boundary operation `bd(S)`
+    pub fn boundary(&self) -> Self {
+        unimplemented!()
+    }
 }
