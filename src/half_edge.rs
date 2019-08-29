@@ -66,17 +66,6 @@ impl ConnectionMatrix {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Mesh<Vertex, Edge, Face> {
-    vertices: Vec<Vertex>,
-    edges: Vec<Edge>,
-    faces: Vec<Face>,
-    /// A0 matrix in DDG
-    vertex_edge: ConnectionMatrix,
-    /// A1 matrix in DDG
-    edge_face: ConnectionMatrix,
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,5 +114,27 @@ mod tests {
         assert_eq!(mat.fr, vec![0, 2, 2, 4, 6]);
         assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
         assert_eq!(mat.shape(), (4, 4));
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Mesh<Vertex, Edge, Face> {
+    vertices: Vec<Vertex>,
+    edges: Vec<Edge>,
+    faces: Vec<Face>,
+    /// A0 matrix in DDG
+    vertex_edge: ConnectionMatrix,
+    /// A1 matrix in DDG
+    edge_face: ConnectionMatrix,
+}
+
+impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
+    pub fn from_connections(vertex_edge: ConnectionMatrix, edge_face: ConnectionMatrix) -> Self
+    where
+        Vertex: Default,
+        Edge: Default,
+        Face: Default,
+    {
+        unimplemented!()
     }
 }
