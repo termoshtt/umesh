@@ -1,2 +1,3 @@
+pub mod connection_matrix;
 pub mod half_edge;
-mod permutation;
+pub mod permutation;
