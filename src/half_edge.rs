@@ -144,7 +144,20 @@ impl<'mesh> Simplices<'mesh> {
 
     /// Closure operation `Cl(S)`
     pub fn closure(&self) -> Self {
-        unimplemented!()
+        let edges = append_unique(
+            self.mesh.face_edge.gather_connected(&self.faces),
+            &self.edges,
+        );
+        let vertices = append_unique(
+            self.mesh.edge_vertex.gather_connected(&edges),
+            &self.vertices,
+        );
+        Simplices {
+            mesh: self.mesh,
+            vertices,
+            edges,
+            faces: self.faces.clone(),
+        }
     }
 
     /// Link operation `Lk(S)`
