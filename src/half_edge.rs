@@ -179,10 +179,22 @@ pub struct Mesh<Vertex, Edge, Face> {
 impl<Vertex, Edge, Face> Mesh<Vertex, Edge, Face> {
     pub fn from_connections(vertex_edge: ConnectionMatrix, edge_face: ConnectionMatrix) -> Self
     where
-        Vertex: Default,
-        Edge: Default,
-        Face: Default,
+        Vertex: Default + Clone,
+        Edge: Default + Clone,
+        Face: Default + Clone,
     {
-        unimplemented!()
+        let (v, e1) = vertex_edge.shape();
+        let (e2, f) = edge_face.shape();
+        assert_eq!(e1, e2); // Vertex-Edge matrix and Edge-Face matrix are compatible
+        let vertices = vec![Default::default(); v];
+        let edges = vec![Default::default(); e1];
+        let faces = vec![Default::default(); f];
+        Mesh {
+            vertices,
+            edges,
+            faces,
+            vertex_edge,
+            edge_face,
+        }
     }
 }
