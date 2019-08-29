@@ -12,6 +12,7 @@ based on [Keenan Crane][DDG].
 pub struct ConnectionMatrix {
     fr: Vec<usize>,
     to: Vec<usize>,
+    to_max: usize,
 }
 
 impl ConnectionMatrix {
@@ -41,21 +42,27 @@ impl ConnectionMatrix {
         let mut to = Vec::with_capacity(indices.len());
         let mut fr = vec![0];
         let mut current_fr = 0;
+        let mut to_max = 0;
         for (n, (f, t)) in indices.into_iter().enumerate() {
             while f != current_fr {
                 fr.push(n);
                 current_fr += 1;
             }
+            to_max = std::cmp::max(to_max, t);
             to.push(t);
         }
         fr.push(to.len());
-        ConnectionMatrix { fr, to }
+        ConnectionMatrix { fr, to, to_max }
     }
 
     pub fn get_connected(&self, from_index: usize) -> &[usize] {
         let first = self.fr[from_index];
         let last = self.fr[from_index + 1];
         &self.to[first..last]
+    }
+
+    pub fn shape(&self) -> (usize, usize) {
+        (self.fr.len() - 1, self.to_max + 1)
     }
 }
 
@@ -92,6 +99,7 @@ mod tests {
         dbg!(&mat);
         assert_eq!(mat.fr, vec![0, 2, 4, 6, 8]);
         assert_eq!(mat.to, vec![0, 2, 0, 1, 1, 3, 0, 3]);
+        assert_eq!(mat.shape(), (4, 4));
     }
 
     #[test]
@@ -103,6 +111,7 @@ mod tests {
         dbg!(&mat);
         assert_eq!(mat.fr, vec![0, 2, 4, 6]);
         assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
+        assert_eq!(mat.shape(), (3, 4));
     }
 
     #[test]
@@ -115,5 +124,6 @@ mod tests {
         dbg!(&mat);
         assert_eq!(mat.fr, vec![0, 2, 2, 4, 6]);
         assert_eq!(mat.to, vec![0, 2, 1, 3, 0, 3]);
+        assert_eq!(mat.shape(), (4, 4));
     }
 }
