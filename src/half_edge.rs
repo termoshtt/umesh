@@ -109,6 +109,15 @@ pub struct Simplices<'mesh> {
     faces: Vec<usize>,
 }
 
+fn append_unique(mut a: Vec<usize>, b: &[usize]) -> Vec<usize> {
+    for &val in b {
+        a.push(val)
+    }
+    a.sort_unstable();
+    a.dedup();
+    a
+}
+
 impl<'mesh> Simplices<'mesh> {
     pub fn is_complex(&self) -> bool {
         unimplemented!()
@@ -120,7 +129,17 @@ impl<'mesh> Simplices<'mesh> {
 
     /// Star operation `St(S)` (not Hodge star)
     pub fn star(&self) -> Self {
-        unimplemented!()
+        let edges = append_unique(
+            self.mesh.vertex_edge.gather_connected(&self.vertices),
+            &self.edges,
+        );
+        let faces = append_unique(self.mesh.edge_face.gather_connected(&edges), &self.faces);
+        Simplices {
+            mesh: self.mesh,
+            vertices: self.vertices.clone(),
+            edges,
+            faces,
+        }
     }
 
     /// Closure operation `Cl(S)`
