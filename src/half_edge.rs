@@ -99,6 +99,10 @@ impl<'mesh> std::ops::Sub for Simplices<'mesh> {
 }
 
 impl<'mesh> Simplices<'mesh> {
+    pub fn is_empty(&self) -> bool {
+        self.vertices.is_empty() && self.edges.is_empty() && self.faces.is_empty()
+    }
+
     pub fn is_complex(&self) -> bool {
         let edges = self
             .mesh
