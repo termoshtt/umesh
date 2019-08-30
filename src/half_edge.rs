@@ -100,11 +100,42 @@ impl<'mesh> std::ops::Sub for Simplices<'mesh> {
 
 impl<'mesh> Simplices<'mesh> {
     pub fn is_complex(&self) -> bool {
-        unimplemented!()
+        let edges = self
+            .mesh
+            .face_edge
+            .gather_connected(self.faces.iter().cloned());
+        if !edges.is_subset(&self.edges) {
+            return false;
+        }
+        let vertices = self
+            .mesh
+            .edge_vertex
+            .gather_connected(edges.iter().cloned());
+        vertices.is_subset(&self.vertices)
     }
 
-    pub fn is_pure_complex(&self) -> bool {
-        unimplemented!()
+    pub fn is_pure_complex(&self) -> Option<usize> {
+        let edges = self
+            .mesh
+            .face_edge
+            .gather_connected(self.faces.iter().cloned());
+        if edges != self.edges {
+            return None;
+        }
+        let vertices = self
+            .mesh
+            .edge_vertex
+            .gather_connected(edges.iter().cloned());
+        if vertices != self.vertices {
+            return None;
+        }
+        if !self.faces.is_empty() {
+            return Some(2);
+        }
+        if !self.edges.is_empty() {
+            return Some(1);
+        }
+        return Some(0);
     }
 
     /// Star operation `St(S)` (not Hodge star)
