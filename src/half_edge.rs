@@ -86,6 +86,18 @@ pub struct Simplices<'mesh> {
     faces: BTreeSet<usize>,
 }
 
+impl<'mesh> std::ops::Sub for Simplices<'mesh> {
+    type Output = Self;
+    fn sub(self, other: Self) -> Self {
+        Simplices {
+            mesh: self.mesh,
+            vertices: self.vertices.difference(&other.vertices).cloned().collect(),
+            edges: self.edges.difference(&other.edges).cloned().collect(),
+            faces: self.faces.difference(&other.faces).cloned().collect(),
+        }
+    }
+}
+
 impl<'mesh> Simplices<'mesh> {
     pub fn is_complex(&self) -> bool {
         unimplemented!()
@@ -142,7 +154,7 @@ impl<'mesh> Simplices<'mesh> {
 
     /// Link operation `Lk(S)`
     pub fn link(&self) -> Self {
-        unimplemented!()
+        self.star().closure() - self.closure().star()
     }
 
     /// Boundary operation `bd(S)`
