@@ -8,6 +8,8 @@ based on [Keenan Crane][DDG].
 */
 
 use crate::{connection_matrix::*, permutation::*};
+use std::collections::BTreeSet;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub struct Mesh {
@@ -63,37 +65,12 @@ impl Mesh {
     }
 
     /// Get simplicies
-    pub fn simplicies(
-        &self,
-        mut vertices: Vec<usize>,
-        mut edges: Vec<usize>,
-        mut faces: Vec<usize>,
-    ) -> Simplices {
-        vertices.sort_unstable();
-        vertices.dedup();
-        edges.sort_unstable();
-        edges.dedup();
-        faces.sort_unstable();
-        faces.dedup();
-        unsafe { self.simplicies_sorted(vertices, edges, faces) }
-    }
-
-    /// Get simplicies with sorted unique indices
-    ///
-    /// Safety
-    /// -------
-    /// - Input vectors must be sorted and uniqued
-    pub unsafe fn simplicies_sorted(
-        &self,
-        vertices: Vec<usize>,
-        edges: Vec<usize>,
-        faces: Vec<usize>,
-    ) -> Simplices {
+    pub fn simplicies(&self, vertices: &[usize], edges: &[usize], faces: &[usize]) -> Simplices {
         Simplices {
             mesh: self,
-            vertices,
-            edges,
-            faces,
+            vertices: BTreeSet::from_iter(vertices.iter().cloned()),
+            edges: BTreeSet::from_iter(edges.iter().cloned()),
+            faces: BTreeSet::from_iter(faces.iter().cloned()),
         }
     }
 }
@@ -104,18 +81,9 @@ impl Mesh {
 #[derive(Debug, Clone)]
 pub struct Simplices<'mesh> {
     mesh: &'mesh Mesh,
-    vertices: Vec<usize>,
-    edges: Vec<usize>,
-    faces: Vec<usize>,
-}
-
-fn append_unique(mut a: Vec<usize>, b: &[usize]) -> Vec<usize> {
-    for &val in b {
-        a.push(val)
-    }
-    a.sort_unstable();
-    a.dedup();
-    a
+    vertices: BTreeSet<usize>,
+    edges: BTreeSet<usize>,
+    faces: BTreeSet<usize>,
 }
 
 impl<'mesh> Simplices<'mesh> {
@@ -129,12 +97,18 @@ impl<'mesh> Simplices<'mesh> {
 
     /// Star operation `St(S)` (not Hodge star)
     pub fn star(&self) -> Self {
-        let edges = append_unique(
-            self.mesh.vertex_edge.gather_connected(&self.vertices),
-            &self.edges,
-        );
-        let faces = append_unique(self.mesh.edge_face.gather_connected(&edges), &self.faces);
-        Simplices {
+        let mut edges = self
+            .mesh
+            .vertex_edge
+            .gather_connected(self.vertices.iter().cloned());
+        for &edge in &self.edges {
+            edges.insert(edge);
+        }
+        let mut faces = self.mesh.edge_face.gather_connected(edges.iter().cloned());
+        for &face in &self.faces {
+            faces.insert(face);
+        }
+        Self {
             mesh: self.mesh,
             vertices: self.vertices.clone(),
             edges,
@@ -144,15 +118,21 @@ impl<'mesh> Simplices<'mesh> {
 
     /// Closure operation `Cl(S)`
     pub fn closure(&self) -> Self {
-        let edges = append_unique(
-            self.mesh.face_edge.gather_connected(&self.faces),
-            &self.edges,
-        );
-        let vertices = append_unique(
-            self.mesh.edge_vertex.gather_connected(&edges),
-            &self.vertices,
-        );
-        Simplices {
+        let mut edges = self
+            .mesh
+            .face_edge
+            .gather_connected(self.faces.iter().cloned());
+        for &edge in &self.edges {
+            edges.insert(edge);
+        }
+        let mut vertices = self
+            .mesh
+            .edge_vertex
+            .gather_connected(edges.iter().cloned());
+        for &vertex in &self.vertices {
+            vertices.insert(vertex);
+        }
+        Self {
             mesh: self.mesh,
             vertices,
             edges,

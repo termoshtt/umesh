@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 /// Sorted indices of a connection (equal to CRS format in sparce matrices without elements)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Connection {
@@ -54,16 +56,15 @@ impl Connection {
     }
 
     /// Get connected indices of input indices
-    pub fn gather_connected(&self, from_indices: &[usize]) -> Vec<usize> {
-        let mut mapped: Vec<usize> = from_indices
-            .iter()
-            .map(|&from_index| self.get_connected(from_index).iter())
+    pub fn gather_connected<Iter: Iterator<Item = usize>>(
+        &self,
+        from_indices: Iter,
+    ) -> BTreeSet<usize> {
+        from_indices
+            .map(|from_index| self.get_connected(from_index).iter())
             .flatten()
             .cloned()
-            .collect();
-        mapped.sort_unstable();
-        mapped.dedup();
-        mapped
+            .collect()
     }
 
     pub fn shape(&self) -> (usize, usize) {
