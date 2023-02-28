@@ -2,34 +2,15 @@
 Utility for permutation (see DDG §2.5 for detail)
 */
 
-use std::cmp::{Ord, Ordering};
-
-#[derive(Debug, Clone, PartialOrd, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Orbit {
     /// rotated to the minimum comes first
     edges: Vec<usize>,
 }
 
-impl Ord for Orbit {
-    fn cmp(&self, other: &Orbit) -> Ordering {
-        for i in 0.. {
-            match self.edges[i].cmp(&other.edges[i]) {
-                Ordering::Less => return Ordering::Less,
-                Ordering::Greater => return Ordering::Greater,
-                Ordering::Equal => {
-                    if i == self.edges.len() - 1 {
-                        return Ordering::Equal;
-                    }
-                }
-            }
-        }
-        unreachable!()
-    }
-}
-
 impl Orbit {
     fn new(edges: &[usize]) -> Self {
-        assert!(edges.len() > 0);
+        assert!(!edges.is_empty());
         // take argmin
         let mut argmin = 0;
         let mut min = edges[0];

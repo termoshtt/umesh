@@ -61,8 +61,7 @@ impl Connection {
         from_indices: Iter,
     ) -> BTreeSet<usize> {
         from_indices
-            .map(|from_index| self.get_connected(from_index).iter())
-            .flatten()
+            .flat_map(|from_index| self.get_connected(from_index).iter())
             .cloned()
             .collect()
     }
