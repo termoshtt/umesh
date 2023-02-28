@@ -1,6 +1,8 @@
 umesh: mincro mesher
 ====================
 
+[![main](https://img.shields.io/badge/docs-main-blue)](https://termoshtt.github.io/umesh/umesh/)
+
 **CAUTION: This software is in pre-alpha stage. Do not use!!**
 
 This crate implements discrite differential geometrical algorithms based on the textbook,
