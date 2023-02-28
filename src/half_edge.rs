@@ -50,16 +50,14 @@ impl Mesh {
             gather_vertices(permutation)
                 .iter()
                 .enumerate()
-                .map(move |(v, orbit)| orbit.indices().iter().map(move |&e| (v, e)))
-                .flatten(),
+                .flat_map(move |(v, orbit)| orbit.indices().iter().map(move |&e| (v, e))),
         );
 
         let edge_face = Connection::from_iter(
             gather_faces(permutation)
                 .iter()
                 .enumerate()
-                .map(move |(f, orbit)| orbit.indices().iter().map(move |&e| (e, f)))
-                .flatten(),
+                .flat_map(move |(f, orbit)| orbit.indices().iter().map(move |&e| (e, f))),
         );
         Self::from_connections(vertex_edge, edge_face)
     }
@@ -139,7 +137,7 @@ impl<'mesh> Simplices<'mesh> {
         if !self.edges.is_empty() {
             return Some(1);
         }
-        return Some(0);
+        Some(0)
     }
 
     /// Star operation `St(S)` (not Hodge star)

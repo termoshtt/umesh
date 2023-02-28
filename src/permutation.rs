@@ -29,7 +29,7 @@ impl Ord for Orbit {
 
 impl Orbit {
     fn new(edges: &[usize]) -> Self {
-        assert!(edges.len() > 0);
+        assert!(!edges.is_empty());
         // take argmin
         let mut argmin = 0;
         let mut min = edges[0];
