@@ -2,7 +2,7 @@ umesh: micro mesher
 ====================
 [![main](https://img.shields.io/badge/docs-main-blue)](https://termoshtt.github.io/umesh/umesh/)
 
-Discrite differential geometrical algorithms based on the textbook <https://www.cs.cmu.edu/~kmcrane/Projects/DDG> by Keenan Crane.
+A crate for discrete differential geometry based on <a href="https://www.cs.cmu.edu/~kmcrane/Projects/DDG" target="_blank">the textbook by Keenan Crane</a>.
 
 License
 -------
